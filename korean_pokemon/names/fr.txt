@@ -904,6 +904,4 @@ idx,name
 903,Farfurex
 904,Qwilpik
 905,Amovénus
-???,Poussacha
-???,Chochodile
 ???,Coiffeton

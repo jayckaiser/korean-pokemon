@@ -21,15 +21,15 @@ class PokemonSheet:
         page_num: int,
         pokemons: dict,
 
-        main_lang: str = 'ko',
+        name_lang: str = 'ko',
         trans_lang: str = 'en',
 
         *,
-        main_font_size : int = 30,
-        trans_font_size: int = 20,
+        name_font_size : int = 20,
+        trans_font_size: int = 16,
         nums_font_size : int = 16,
 
-        main_font : str = 'notosansmonocjkkr',
+        name_font : str = 'notosansmonocjkkr',
         trans_font: str = 'arial',
         nums_font : str = 'arial',
 
@@ -50,14 +50,14 @@ class PokemonSheet:
         self.page_num = page_num
         self.pokemons = pokemons
 
-        self.main_lang  = main_lang
+        self.name_lang  = name_lang
         self.trans_lang = trans_lang
 
-        self.main_font_size  = main_font_size
+        self.name_font_size  = name_font_size
         self.trans_font_size = trans_font_size
         self.nums_font_size  = nums_font_size
 
-        self.main_font  = pg.font.SysFont(main_font, main_font_size)
+        self.name_font  = pg.font.SysFont(name_font, name_font_size)
         self.trans_font = pg.font.SysFont(trans_font, trans_font_size)
         self.nums_font  = pg.font.SysFont(nums_font, nums_font_size)
 
@@ -92,7 +92,7 @@ class PokemonSheet:
             self.add_bubble(
                 x, y,
                 idx=pokemon_idx,
-                name = pokemon.get(self.main_lang),
+                name = pokemon.get(self.name_lang),
                 trans = pokemon.get(self.trans_lang),
                 image = pokemon.get('image'),
             )
@@ -109,31 +109,35 @@ class PokemonSheet:
             image
     ):
         """
-        
+        Dynamically build the Pokedex entry on the page,
+        based on the number of images per page.
         """
-        image = self.get_image(image)
+        #
+        center_x = x + self.pokemon_size // 2
 
-        # Dynamically build the location of the image on the page,
-        # based on the number of images per page.
-        self.window.blit(image, (x, y))
         
-        # Draw the Pokemon names under the Pokemon
-        names_x = x + self.pokemon_size // 2
-        
-        numbers_y = y + self.pokemon_size + 7
-        numbers_text = self.nums_font.render(idx, False, BLACK)
-        
-        numbers_rect = numbers_text.get_rect(center=(names_x, numbers_y))
-        self.window.blit(numbers_text, numbers_rect)
-        
-        names_y = y + self.pokemon_size + (self.main_font_size // 1)
-        names_text = self.main_font.render(name, False, BLACK)
-        names_rect = names_text.get_rect(center=(names_x, names_y))
-        self.window.blit(names_text, names_rect)
-        
-        trans_y = y + self.pokemon_size + self.main_font_size + (self.trans_font_size // 0.6)
+        image_obj  = self.get_image(image)
+        num_text   = self.nums_font.render(idx, False, BLACK)
+        name_text  = self.name_font.render(name, False, BLACK)
         trans_text = self.trans_font.render(trans, False, BLACK)
-        trans_rect = trans_text.get_rect(center=(names_x, trans_y))
+
+        # 
+        num_rect = num_text.get_rect(midbottom=(center_x, y))
+
+        image_y = num_rect.midbottom[1]
+        image_rect = image_obj.get_rect(midtop=(center_x, image_y))
+        
+        # name_y = image_rect.midbottom[1]
+        name_y = image_rect.midtop[1] + self.pokemon_size
+        name_rect = name_text.get_rect(midtop=(center_x, name_y))
+        
+        trans_y = name_rect.midbottom[1]
+        trans_rect = trans_text.get_rect(midtop=(center_x, trans_y))
+
+        # 
+        self.window.blit(num_text  , num_rect  )
+        self.window.blit(image_obj , image_rect)
+        self.window.blit(name_text , name_rect )
         self.window.blit(trans_text, trans_rect)
 
 
@@ -199,13 +203,17 @@ if __name__ == '__main__':
     from pokedex import Pokedex
 
 
-    main_lang  = 'de'
-    trans_lang = 'en'
+    name_lang  = 'ko'
+    trans_lang = 'de'
+
+    # name_font = 'arialms'
+    # trans_font = 'arialms'
+    # num_font = 'arialms'
 
 
     lang_dir = "names"
     image_dir = "images"
-    pages_dir = f"pages/{main_lang}_to_{trans_lang}"
+    pages_dir = f"pages/{name_lang}_to_{trans_lang}"
 
     pokedex_ = Pokedex(lang_dir, image_dir)
 
@@ -224,12 +232,16 @@ if __name__ == '__main__':
         sheet = PokemonSheet(
             page_num,
             pokedex_.pokemons,
-            main_lang=main_lang,
+            name_lang=name_lang,
             trans_lang=trans_lang,
+
+            # name_font=name_font,
+            # trans_font=trans_font,
+            # num_font=num_font,
 
             num_rows=num_rows,
             num_columns=num_columns
         )
 
         sheet.to_png(pages_dir)
-        print(f"Wrote out page number {page_num} for {main_lang} to {trans_lang}.")
+        print(f"Wrote out page number {page_num} for {name_lang} to {trans_lang}.")

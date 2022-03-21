@@ -904,6 +904,4 @@ idx,name
 903,Snieboss
 904,Myriador
 905,Cupidos
-???,Felori
-???,Krokel
 ???,Kwaks
